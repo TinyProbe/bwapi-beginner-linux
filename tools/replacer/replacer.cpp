@@ -6,7 +6,7 @@ static std::pair<std::string, std::string> disassemble(std::string s);
 int main(int ac, char **av) {
     if (ac < 2) {
         std::cerr << "usage:                                                    " << '\n';
-        std::cerr << "    ./replacer < <filepath> [ 'variable = value', ... ]   " << '\n';
+        std::cerr << "    ./replacer < <filepath> 'variable = value' [ ... ]    " << '\n';
         std::cerr << "                                                          " << std::endl;
         return -1;
     }
