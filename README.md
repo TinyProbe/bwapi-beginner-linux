@@ -1,4 +1,4 @@
-# bwapi-beginner-linux
+# bwapi-linux
 
 A basic Linux version for developing starcraft bots using bwapi.
 
