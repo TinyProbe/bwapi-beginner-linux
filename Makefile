@@ -1,6 +1,6 @@
 # This file is based on "Makefile Cookbook" from the https://makefiletutorial.com/.
 
-TARGET := mybot.exe
+TARGET := bwapi_bot.exe
 CXX := i686-w64-mingw32-g++
 
 SRC_DIR := ./src
@@ -17,7 +17,7 @@ INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 # The -MMD and -MP flags together generate Makefiles for us!
 # These files will have .d instead of .o as the output.
 CPPFLAGS := $(INC_FLAGS) -MMD -MP
-CXXFLAGS := -Wall -Wextra -Wall
+CXXFLAGS := -Wall -Wextra -Wall -O2 --std=c++17
 
 # The final build step.
 $(BIN_DIR)/$(TARGET): $(OBJS)
