@@ -1,2 +1,21 @@
 # bwapi-beginner-linux
+
 A basic Linux version for developing starcraft bots using bwapi.
+
+Get started with Starcraft: BroodWar AI Development as fast as possible.
+
+New to StarCraft or AI Programming? Watch the tutorial video(s):
+* Starcraft AI Intro: https://www.youtube.com/watch?v=czhNqUxmLks
+* STARTcraft Tutorial: https://www.youtube.com/watch?v=FEEkO6__GKw
+
+# Setup Instructions:
+
+1. Download / Clone this repo to your computer.
+2. Download [Starcraft Broodwar 1.16.1](https://drive.google.com/file/d/1q4gib8OQ0CMDMBorhwWwta135uqwlCSk/view?usp=sharing) to the root directory.
+3. Unzip starcraft.tar.xz using: `tar -xJf starcraft.tar.xz`.
+4. Install Mingw-w64 using: `sudo apt install build-essential mingw-w64`.
+5. Install wine using: `sudo dpkg --add-architecture i386 && sudo apt update && sudo apt install wine`.
+6. Run `bash run.sh` which will launch the bot executable and Starcraft/BWAPI.
+7. Run the `make clean` command to clean up the binary files.
+
+This repository is a repo for Linux developers, based on https://github.com/davechurchill/STARTcraft.
