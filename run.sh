@@ -4,7 +4,7 @@
 ARGC="$#"
 ARGV=("$0" "$1" "$2" "$3")
 
-BOT_NAME="$(cat ./Makefile | grep 'TARGET := ' | grep -oE '([a-zA-Z_]+.exe)')"
+BOT_NAME="$(cat ./Makefile | grep 'TARGET := ' | grep -oE '([a-zA-Z0-9_]+.exe)')"
 
 function error {
     echo "usage:                                                                "
@@ -102,7 +102,7 @@ function single_mode {
 }
 
 function versus_mode {
-    local bot_list="$(ls -al bin | grep '.exe' | grep -oE '([a-zA-Z_]+.exe)')"
+    local bot_list="$(ls -al bin | grep '.exe' | grep -oE '([a-zA-Z0-9_]+.exe)')"
     local old_ifs="$IFS"
     IFS="
     "
