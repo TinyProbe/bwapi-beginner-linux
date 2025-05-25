@@ -97,7 +97,8 @@ function single_mode {
     if [ "$ARGC" -ge 3 ]; then
         replace "enemy_race = $(correction ${ARGV[3]})"
     fi
-    wine cmd /c ./tools/run_bot_scbw.bat "./bin/$BOT_NAME"
+    wine cmd /c ./tools/run_bot.bat "./bin/$BOT_NAME"
+    wine cmd /c ./tools/run_scbw.bat
 }
 
 function versus_mode {
@@ -120,10 +121,10 @@ function versus_mode {
         exit 1
     fi
 
-    local other_bot="./bot/${BOTS[0]}"
+    local other_bot="${BOTS[0]}"
     if [ "${#BOTS[@]}" -eq 2 ]; then
         if [ "$BOT_NAME" = "${BOTS[0]}" ]; then
-            other_bot="./bot/${BOTS[1]}"
+            other_bot="${BOTS[1]}"
         fi
     fi
 
@@ -132,18 +133,20 @@ function versus_mode {
     if [ "$ARGC" -ge 2 ]; then
         replace "race = $(correction ${ARGV[2]})"
     fi
-    wine cmd /c ./tools/run_bot_scbw.bat "./bin/$BOT_NAME"
+    wine cmd /c ./tools/run_bot.bat "./bin/$BOT_NAME"
+    wine cmd /c ./tools/run_scbw.bat
 
     sleep 3
 
-    # TODO: cannot create process of other bot
+    TODO: cannot create process of other bot
 
     local other_race="Random"
     if [ "$ARGC" -ge 3 ]; then
         other_race="$(correction ${ARGV[3]})"
     fi
     replace "race = $other_race" "character_name = other-bot" "game = JOIN_FIRST"
-    wine cmd /c ./tools/run_bot_scbw.bat "$other_bot"
+    wine cmd /c ./tools/run_bot.bat "./bin/$other_bot"
+    wine cmd /c ./tools/run_scbw.bat
 }
 
 function self_mode {
@@ -152,7 +155,8 @@ function self_mode {
     if [ "$ARGC" -ge 2 ]; then
         replace "race = $(correction ${ARGV[2]})"
     fi
-    wine cmd /c ./tools/run_bot_scbw.bat "./bin/$BOT_NAME"
+    wine cmd /c ./tools/run_bot.bat "./bin/$BOT_NAME"
+    wine cmd /c ./tools/run_scbw.bat
 
     sleep 3
 
