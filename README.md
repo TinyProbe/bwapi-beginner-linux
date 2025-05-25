@@ -19,6 +19,4 @@ New to StarCraft or AI Programming? Watch the tutorial video(s):
 7. Run `bash run.sh` which will launch the bot executable and Starcraft/BWAPI.
 8. You can clean up the binary files by running the `make clean` command.
 
-> p.s. Don't change TARGET name in Makefile.
-
 This repository is a repo for Linux developers, based on https://github.com/davechurchill/STARTcraft.

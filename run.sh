@@ -4,9 +4,11 @@
 ARGC="$#"
 ARGV=("$0" "$1" "$2" "$3")
 
+BOT_NAME="$(cat ./Makefile | grep 'TARGET := ' | grep -oE '([a-zA-Z_]+.exe)')"
+
 function error {
     echo "usage:                                                                "
-    echo "    ./run.sh <command> [ bot_race ] [ other_race ]                    "
+    echo "    ./run.sh <command> [ bot_race [ other_race ] ]                    "
     echo "                                                                      "
     echo "commands:                                                             "
     echo "    single      Play against the computer in single player using bots "
@@ -15,11 +17,13 @@ function error {
     echo "    self        You will compete directly against the bot you created."
     echo "                                                                      "
     echo "options:                                                              "
-    echo "   (default)                                                          "
-    echo "    random   | protoss | terran | zerg                                "
+    echo "    random      (default)                                             "
+    echo "    protoss                                                           "
+    echo "    terran                                                            "
+    echo "    zerg                                                              "
     echo "                                                                      "
-    echo "    bot_race    Select the race of the bot you created.               "
-    echo "    other_race  Choose computer, opponent bots or your own race.      "
+    echo "    [bot_race]      Select the race of the bot you created.           "
+    echo "    [other_race]    Choose computer, opponent bots or your own race.  "
     echo "                                                                      "
     exit 1
 }
@@ -58,6 +62,8 @@ function initial {
     if [ ! -f "./tools/repl" ]; then
         g++ -Wall -Wextra -Werror --std=c++17 -O2 -o ./tools/repl ./tools/replacer/replacer.cpp
     fi
+
+    # copy default bwapi.ini
     cp -rf ./tools/bwapi.ini ./starcraft/bwapi-data/bwapi.ini
 }
 
@@ -79,8 +85,9 @@ function replace {
         echo "invalid argument: replace '<variable> = <value>' [ ... ]"
         return 1
     fi
-    ./tools/repl < ./starcraft/bwapi-data/bwapi.ini "$@" > ./starcraft/bwapi-data/bwapi.ini.new
-    cp -rf ./starcraft/bwapi-data/bwapi.ini.new ./starcraft/bwapi-data/bwapi.ini
+    ./tools/repl "$@" < ./starcraft/bwapi-data/bwapi.ini > ./starcraft/bwapi-data/bwapi.ini.new
+    rm ./starcraft/bwapi-data/bwapi.ini
+    mv ./starcraft/bwapi-data/bwapi.ini.new ./starcraft/bwapi-data/bwapi.ini
 }
 
 function single_mode {
@@ -90,11 +97,53 @@ function single_mode {
     if [ "$ARGC" -ge 3 ]; then
         replace "enemy_race = $(correction ${ARGV[3]})"
     fi
-    wine cmd /c ./tools/run_bot_scbw.bat
+    wine cmd /c ./tools/run_bot_scbw.bat "./bin/$BOT_NAME"
 }
 
 function versus_mode {
-    echo "versus mode not yet"
+    local bot_list="$(ls -al bin | grep '.exe' | grep -oE '([a-zA-Z_]+.exe)')"
+    local old_ifs="$IFS"
+    IFS="
+    "
+    local i=0
+    for bot in $bot_list; do
+        BOTS[$i]="$bot";
+        i=$(expr "$i" + 1)
+    done
+    IFS="$old_ifs"
+
+    if [[ "${#BOTS[@]}" -lt 1 || "${#BOTS[@]}" -gt 2 ]]; then
+        echo "versus mode:                                                         "
+        echo "    ./bin/*.exe    There should be one or two bot executables in the "
+        echo "                   ./bin/ directory.                                 "
+        echo "                                                                     "
+        exit 1
+    fi
+
+    local other_bot="./bot/${BOTS[0]}"
+    if [ "${#BOTS[@]}" -eq 2 ]; then
+        if [ "$BOT_NAME" = "${BOTS[0]}" ]; then
+            other_bot="./bot/${BOTS[1]}"
+        fi
+    fi
+
+    replace "auto_menu = LAN"
+
+    if [ "$ARGC" -ge 2 ]; then
+        replace "race = $(correction ${ARGV[2]})"
+    fi
+    wine cmd /c ./tools/run_bot_scbw.bat "./bin/$BOT_NAME"
+
+    sleep 3
+
+    # TODO: cannot create process of other bot
+
+    local other_race="Random"
+    if [ "$ARGC" -ge 3 ]; then
+        other_race="$(correction ${ARGV[3]})"
+    fi
+    replace "race = $other_race" "character_name = other-bot" "game = JOIN_FIRST"
+    wine cmd /c ./tools/run_bot_scbw.bat "$other_bot"
 }
 
 function self_mode {
@@ -103,7 +152,7 @@ function self_mode {
     if [ "$ARGC" -ge 2 ]; then
         replace "race = $(correction ${ARGV[2]})"
     fi
-    wine cmd /c ./tools/run_bot_scbw.bat
+    wine cmd /c ./tools/run_bot_scbw.bat "./bin/$BOT_NAME"
 
     sleep 3
 
@@ -127,8 +176,4 @@ elif [ "${ARGV[1]}" = "self" ]; then
     self_mode
 else                # wrong argument
     error
-fi
-
-if [ -f "./starcraft/bwapi-data/bwapi.ini.new" ]; then
-    rm ./starcraft/bwapi-data/bwapi.ini.new
 fi
