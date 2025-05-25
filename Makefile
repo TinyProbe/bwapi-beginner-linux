@@ -1,5 +1,6 @@
 # This file is based on "Makefile Cookbook" from the https://makefiletutorial.com/.
 
+# TARGET name must contain only [a-zA-Z0-9_]+
 TARGET := bwapi_bot.exe
 CXX := i686-w64-mingw32-g++
 
