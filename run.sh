@@ -138,8 +138,6 @@ function versus_mode {
 
     sleep 3
 
-    TODO: cannot create process of other bot
-
     local other_race="Random"
     if [ "$ARGC" -ge 3 ]; then
         other_race="$(correction ${ARGV[3]})"
