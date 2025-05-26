@@ -23,7 +23,7 @@ function error {
     echo "    zerg                                                              "
     echo "                                                                      "
     echo "    [bot_race]      Select the race of the bot you created.           "
-    echo "    [other_race]    Choose computer, opponent bots or your own race.  "
+    echo "    [other_race]    Select computer/opponent bot/your race.           "
     echo "                                                                      "
     exit 1
 }
