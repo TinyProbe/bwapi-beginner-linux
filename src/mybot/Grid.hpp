@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _GRID_HPP_
+#define _GRID_HPP_
 
 #include <vector>
 #include <cstddef>
@@ -38,3 +39,5 @@ public:
         return m_height;
     }
 };
+
+#endif

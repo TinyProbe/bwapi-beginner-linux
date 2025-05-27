@@ -1,21 +1,16 @@
-#ifndef _REPLAYPARSER_H_
-#define _REPLAYPARSER_H_
+#ifndef _BOT_H_
+#define _BOT_H_
 
 #include "MapTools.h"
 
 #include <BWAPI.h>
 
-#include <fstream>
-#include <map>
-
-class ReplayParser : public BWAPI::AIModule {
-    MapTools map_;
-    std::ofstream fout_;
-    std::map<int, BWAPI::Position> unitCommands_;
+class Bot : public BWAPI::AIModule {
+    MapTools mapTools_;
 
 public:
-    ReplayParser();
-    ~ReplayParser();
+    Bot();
+    ~Bot();
 
     void onStart();
     void onEnd(bool isWinner);
@@ -36,9 +31,10 @@ public:
     void onSaveGame(std::string gameName);
 
 private:
-    void logUnitCommands();
-    void drawUnitCommands();
-    std::string getUnitString(BWAPI::Unit unit);
+    void sendIdleWorkersToMinerals();
+    void trainAdditionalWorkers();
+    void buildAdditionalSupply();
+    void drawDebugInformation();
 
 };
 

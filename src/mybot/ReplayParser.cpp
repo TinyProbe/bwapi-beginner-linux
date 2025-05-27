@@ -5,32 +5,87 @@
 
 ReplayParser::ReplayParser() {}
 
-// Called when the bot starts!
+ReplayParser::~ReplayParser() {}
+
 void ReplayParser::onStart() {
-    m_map.onStart();
-    m_map.onFrame();
-    m_map.saveMapToFile();
+    map_.onStart();
+    map_.onFrame();
+    map_.saveMapToFile();
 
-    // Set the game to run at super speed so we can parse the replay faster
-    BWAPI::Broodwar->setLocalSpeed(0);
-    BWAPI::Broodwar->setFrameSkip(1024);
+    BWAPI::Broodwar->setLocalSpeed(21);
+    BWAPI::Broodwar->setFrameSkip(0);
 
-    // set up a file to write the output to
-    m_fout = std::ofstream("replaydata/" + BWAPI::Broodwar->mapFileName() + ".txt");
-    m_fout << "map maps/" << (m_map.mapName() + ".txt") << "\n";
+    fout_ = std::ofstream("replaydata/" + BWAPI::Broodwar->mapFileName() + ".txt");
+    fout_ << "map maps/" << (map_.mapName() + ".txt") << '\n';
 }
 
-void ReplayParser::onFrame() {
-    m_map.onFrame();
+void ReplayParser::onEnd(bool isWinner) {}
 
-    //drawUnitCommands();
+void ReplayParser::onFrame() {
+    map_.onFrame();
+
+    drawUnitCommands();
     logUnitCommands();
-    // Draw unit health bars, which brood war unfortunately does not do
-    //Tools::DrawUnitHealthBars();
+    Tools::DrawUnitHealthBars();
+}
+
+void ReplayParser::onSendText(std::string text) {}
+
+void ReplayParser::onReceiveText(BWAPI::Player player, std::string text) {}
+
+void ReplayParser::onPlayerLeft(BWAPI::Player player) {}
+
+void ReplayParser::onNukeDetect(BWAPI::Position target) {}
+
+void ReplayParser::onUnitDiscover(BWAPI::Unit unit) {}
+
+void ReplayParser::onUnitEvade(BWAPI::Unit unit) {}
+
+void ReplayParser::onUnitShow(BWAPI::Unit unit) {}
+
+void ReplayParser::onUnitHide(BWAPI::Unit unit) {}
+
+void ReplayParser::onUnitCreate(BWAPI::Unit unit) {
+    BWAPI::UnitType const type = unit->getType();
+    if (type.isBuilding() && !unit->getPlayer()->isNeutral()) {
+        fout_ << BWAPI::Broodwar->getFrameCount() << " create " << getUnitString(unit) << '\n';
+    }
+}
+
+void ReplayParser::onUnitDestroy(BWAPI::Unit unit) {
+    BWAPI::UnitType const type = unit->getType();
+    if (type.isBuilding() && !unit->getPlayer()->isNeutral()) {
+        fout_ << BWAPI::Broodwar->getFrameCount() << " destroy " << getUnitString(unit) << '\n';
+    }
+}
+
+void ReplayParser::onUnitMorph(BWAPI::Unit unit) {
+    BWAPI::UnitType const type = unit->getType();
+    if (type.isBuilding() && !unit->getPlayer()->isNeutral()) {
+        fout_ << BWAPI::Broodwar->getFrameCount() << " create " << getUnitString(unit) << '\n';
+    }
+}
+
+void ReplayParser::onUnitRenegade(BWAPI::Unit unit) {}
+
+void ReplayParser::onUnitComplete(BWAPI::Unit unit) {}
+
+void ReplayParser::onSaveGame(std::string gameName) {}
+
+
+
+std::string ReplayParser::getUnitString(BWAPI::Unit unit) {
+    BWAPI::UnitType const type = unit->getType();
+    BWAPI::Position tl(unit->getPosition().x - type.dimensionLeft(), unit->getPosition().y - type.dimensionUp());
+    BWAPI::Position br(unit->getPosition().x + type.dimensionRight(), unit->getPosition().y + type.dimensionDown());
+
+    std::stringstream ss;
+    ss << unit->getPlayer()->getID() << ' ' << unit->getID() << ' ' << type.getName();
+    ss << ' ' << tl.x << ' ' << tl.y << ' ' << br.x << ' ' << br.y;
+    return ss.str();
 }
 
 void ReplayParser::drawUnitCommands() {
-    // Draw all unit commands and target positions
     for (auto unit : BWAPI::Broodwar->getAllUnits()) {
         if (!unit->getPlayer()->isNeutral()) {
             BWAPI::Position p1 = unit->getPosition();
@@ -50,92 +105,31 @@ void ReplayParser::logUnitCommands() {
         if (unit->isFlying()) { continue; }
         if (unit->getType().isBuilding()) { continue; }
 
-        // we only care about move or attack move
         auto order = unit->getOrder().getID();
-        if (order != BWAPI::Orders::Move &&
-                order != BWAPI::Orders::AttackMove) {
+        if (order != BWAPI::Orders::Move && order != BWAPI::Orders::AttackMove) {
             continue;
         }
 
         bool newCommand = false;
         BWAPI::Position upos = unit->getPosition();
         BWAPI::Position tpos = unit->getOrderTargetPosition();
-        auto it = m_unitCommands.find(unit->getID());
+        auto it = unitCommands_.find(unit->getID());
 
-        if (it == m_unitCommands.end()) {
+        if (it == unitCommands_.end()) {
             newCommand = true;
-            m_unitCommands[unit->getID()] = tpos;
+            unitCommands_[unit->getID()] = tpos;
         } else {
             if (it->second != tpos) {
                 newCommand = true;
-                m_unitCommands[unit->getID()] = tpos;
+                unitCommands_[unit->getID()] = tpos;
             }
         }
 
         if (newCommand) {
-            m_fout << BWAPI::Broodwar->getFrameCount() << " query ";
-            m_fout << unit->getPlayer()->getID() << " " << unit->getID() << " " << unit->getType().getName() << " ";
-            m_fout << unit->getOrder().getName() << " ";
-            m_fout << upos.x << " " << upos.y << " " << tpos.x << " " << tpos.y << "\n";
+            fout_ << BWAPI::Broodwar->getFrameCount() << " query ";
+            fout_ << unit->getPlayer()->getID() << ' ' << unit->getID() << ' ' << unit->getType().getName() << ' ';
+            fout_ << unit->getOrder().getName() << ' ';
+            fout_ << upos.x << ' ' << upos.y << ' ' << tpos.x << ' ' << tpos.y << '\n';
         }
     }
-}
-
-void ReplayParser::onEnd(bool isWinner) {}
-
-// Called whenever a unit is destroyed, with a pointer to the unit
-void ReplayParser::onUnitDestroy(BWAPI::Unit unit) {
-    BWAPI::UnitType const type = unit->getType();
-    if (type.isBuilding() && !unit->getPlayer()->isNeutral()) {
-        m_fout << BWAPI::Broodwar->getFrameCount() << " destroy " << getUnitString(unit) << "\n";
-    }
-}
-
-// Called whenever a unit is morphed, with a pointer to the unit
-// Zerg units morph when they turn into other units
-void ReplayParser::onUnitMorph(BWAPI::Unit unit) {
-    BWAPI::UnitType const type = unit->getType();
-    if (type.isBuilding() && !unit->getPlayer()->isNeutral()) {
-        m_fout << BWAPI::Broodwar->getFrameCount() << " create " << getUnitString(unit) << "\n";
-    }
-}
-
-// Called whenever a text is sent to the game by a user
-void ReplayParser::onSendText(std::string text) {
-}
-
-// Called whenever a unit is created, with a pointer to the destroyed unit
-// Units are created in buildings like barracks before they are visible, 
-// so this will trigger when you issue the build command for most units
-void ReplayParser::onUnitCreate(BWAPI::Unit unit) {
-    BWAPI::UnitType const type = unit->getType();
-    if (type.isBuilding() && !unit->getPlayer()->isNeutral()) {
-        m_fout << BWAPI::Broodwar->getFrameCount() << " create " << getUnitString(unit) << "\n";
-    }
-}
-
-// Called whenever a unit finished construction, with a pointer to the unit
-void ReplayParser::onUnitComplete(BWAPI::Unit unit) {}
-
-// Called whenever a unit appears, with a pointer to the destroyed unit
-// This is usually triggered when units appear from fog of war and become visible
-void ReplayParser::onUnitShow(BWAPI::Unit unit) {}
-
-// Called whenever a unit gets hidden, with a pointer to the destroyed unit
-// This is usually triggered when units enter the fog of war and are no longer visible
-void ReplayParser::onUnitHide(BWAPI::Unit unit) {}
-
-// Called whenever a unit switches player control
-// This usually happens when a dark archon takes control of a unit
-void ReplayParser::onUnitRenegade(BWAPI::Unit unit) {}
-
-std::string ReplayParser::getUnitString(BWAPI::Unit unit) {
-    BWAPI::UnitType const type = unit->getType();
-    BWAPI::Position tl(unit->getPosition().x - type.dimensionLeft(), unit->getPosition().y - type.dimensionUp());
-    BWAPI::Position br(unit->getPosition().x + type.dimensionRight(), unit->getPosition().y + type.dimensionDown());
-
-    std::stringstream ss;
-    ss << unit->getPlayer()->getID() << " " << unit->getID() << " " << type.getName();
-    ss << " " << tl.x << " " << tl.y << " " << br.x << " " << br.y;
-    return ss.str();
 }

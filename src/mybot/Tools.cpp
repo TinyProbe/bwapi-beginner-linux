@@ -1,6 +1,8 @@
 #include "Tools.h"
 
-BWAPI::Unit Tools::GetClosestUnitTo(BWAPI::Position p, BWAPI::Unitset const &units) {
+namespace Tools {
+
+BWAPI::Unit GetClosestUnitTo(BWAPI::Position p, BWAPI::Unitset const &units) {
     BWAPI::Unit closestUnit = nullptr;
 
     for (auto &u : units) {
@@ -11,12 +13,12 @@ BWAPI::Unit Tools::GetClosestUnitTo(BWAPI::Position p, BWAPI::Unitset const &uni
     return closestUnit;
 }
 
-BWAPI::Unit Tools::GetClosestUnitTo(BWAPI::Unit unit, BWAPI::Unitset const &units) {
+BWAPI::Unit GetClosestUnitTo(BWAPI::Unit unit, BWAPI::Unitset const &units) {
     if (!unit) { return nullptr; }
     return GetClosestUnitTo(unit->getPosition(), units);
 }
 
-int Tools::CountUnitsOfType(BWAPI::UnitType type, BWAPI::Unitset const &units) {
+int CountUnitsOfType(BWAPI::UnitType type, BWAPI::Unitset const &units) {
     int sum = 0;
 
     for (auto &unit : units) {
@@ -27,7 +29,7 @@ int Tools::CountUnitsOfType(BWAPI::UnitType type, BWAPI::Unitset const &units) {
     return sum;
 }
 
-BWAPI::Unit Tools::GetUnitOfType(BWAPI::UnitType type) {
+BWAPI::Unit GetUnitOfType(BWAPI::UnitType type) {
     // For each unit that we own
     for (auto &unit : BWAPI::Broodwar->self()->getUnits()) {
         // if the unit is of the correct type, and it actually has been constructed, return it
@@ -39,13 +41,13 @@ BWAPI::Unit Tools::GetUnitOfType(BWAPI::UnitType type) {
     return nullptr;
 }
 
-BWAPI::Unit Tools::GetDepot() {
+BWAPI::Unit GetDepot() {
     BWAPI::UnitType const depot = BWAPI::Broodwar->self()->getRace().getResourceDepot();
     return GetUnitOfType(depot);
 }
 
 // Attempt tp construct a building of a given type 
-bool Tools::BuildBuilding(BWAPI::UnitType type) {
+bool BuildBuilding(BWAPI::UnitType type) {
     // Get the type of unit that is required to build the desired building
     BWAPI::UnitType builderType = type.whatBuilds().first;
 
@@ -64,7 +66,7 @@ bool Tools::BuildBuilding(BWAPI::UnitType type) {
     return builder->build(type, buildPos);
 }
 
-void Tools::DrawUnitCommands() {
+void DrawUnitCommands() {
     for (auto &unit : BWAPI::Broodwar->self()->getUnits()) {
         BWAPI::UnitCommand const &command = unit->getLastCommand();
 
@@ -88,7 +90,7 @@ void Tools::DrawUnitCommands() {
     }
 }
 
-void Tools::DrawUnitBoundingBoxes() {
+void DrawUnitBoundingBoxes() {
     for (auto &unit : BWAPI::Broodwar->getAllUnits()) {
         BWAPI::Position topLeft(unit->getLeft(), unit->getTop());
         BWAPI::Position bottomRight(unit->getRight(), unit->getBottom());
@@ -96,7 +98,7 @@ void Tools::DrawUnitBoundingBoxes() {
     }
 }
 
-void Tools::SmartRightClick(BWAPI::Unit unit, BWAPI::Unit target) {
+void SmartRightClick(BWAPI::Unit unit, BWAPI::Unit target) {
     // if there's no valid unit, ignore the command
     if (!unit || !target) { return; }
 
@@ -111,7 +113,7 @@ void Tools::SmartRightClick(BWAPI::Unit unit, BWAPI::Unit target) {
     unit->rightClick(target);
 }
 
-int Tools::GetTotalSupply(bool inProgress) {
+int GetTotalSupply(bool inProgress) {
     // start the calculation by looking at our current completed supplyt
     int totalSupply = BWAPI::Broodwar->self()->supplyTotal();
 
@@ -141,7 +143,7 @@ int Tools::GetTotalSupply(bool inProgress) {
     return totalSupply;
 }
 
-void Tools::DrawUnitHealthBars() {
+void DrawUnitHealthBars() {
     // how far up from the unit to draw the health bar
     int verticalOffset = -10;
 
@@ -175,7 +177,7 @@ void Tools::DrawUnitHealthBars() {
     }
 }
 
-void Tools::DrawHealthBar(BWAPI::Unit unit, double ratio, BWAPI::Color color, int yOffset) {
+void DrawHealthBar(BWAPI::Unit unit, double ratio, BWAPI::Color color, int yOffset) {
     int verticalOffset = -10;
     BWAPI::Position const &pos = unit->getPosition();
 
@@ -197,4 +199,6 @@ void Tools::DrawHealthBar(BWAPI::Unit unit, double ratio, BWAPI::Color color, in
     for (int i = left; i < right - 1; i += ticWidth) {
         BWAPI::Broodwar->drawLineMap(BWAPI::Position(i, hpTop), BWAPI::Position(i, hpBottom), BWAPI::Colors::Black);
     }
+}
+
 }

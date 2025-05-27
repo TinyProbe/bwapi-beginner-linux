@@ -1,4 +1,3 @@
-#pragma once
 #ifndef _MAPTOOLS_H_
 #define _MAPTOOLS_H_
 
