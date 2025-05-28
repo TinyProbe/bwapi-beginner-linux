@@ -60,7 +60,7 @@ function initial {
 
     # compile replacer
     if [ ! -f "./tools/repl" ]; then
-        g++ -Wall -Wextra -Werror --std=c++17 -O2 -o ./tools/repl ./tools/replacer/replacer.cpp
+        g++ -Wall -Wextra -Werror --std=c++20 -O2 -o ./tools/repl ./tools/replacer/replacer.cpp
     fi
 
     # copy default bwapi.ini
