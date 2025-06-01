@@ -16,7 +16,10 @@ New to StarCraft or AI Programming? Watch the tutorial video(s):
 4. Install Mingw-w64 using: `sudo apt install build-essential mingw-w64`.
 5. Install wine using: `sudo dpkg --add-architecture i386 && sudo apt update && sudo apt install wine`.
 6. Build the provided bot source code via the `make` command.
-7. Run `bash run.sh` which will launch the bot executable and Starcraft/BWAPI.
+7. Run `bash run.sh`.
 8. You can clean up the binary files by running the `make clean` command.
 
 This repository is a repo for Linux developers, based on https://github.com/davechurchill/STARTcraft.
+
+bwapi repository: https://github.com/bwapi/bwapi
+base repository: https://github.com/davechurchill/STARTcraft
